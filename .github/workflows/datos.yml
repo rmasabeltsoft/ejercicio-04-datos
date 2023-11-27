@@ -1,0 +1,33 @@
+name: Desplegar Sitio Web
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Lintear código
+        run: npm run lint
+      - name: Ejecutar pruebas
+        run: npm run test
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Compilar código
+        run: npm run build
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Desplegar sitio web
+        run: echo "Desplegando..."
