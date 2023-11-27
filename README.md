@@ -1,27 +1,41 @@
 # Ejercicio 04 - Datos y Resultados de Jobs
 
-Ahora para esta sección del curso he preparado otro proyecto de ejemplo, que en realidad está basado en el mismo proyecto de ejemplo anterior, pero que ya viene con un workflow, un archivo **eventos.yml** situado en la carpeta **.github>workflows** donde tenemos definido un workflow de demostración muy simple. Sin embargo, falta el evento porque eso es exactamente lo que revisaremos y en lo que nos sumergiremos en este módulo del taller.
+Ahora para esta sección del curso he preparado otro proyecto de ejemplo, que sigue basado en el mismo proyecto de ejemplo anterior, pero que ya viene con un archivo **datos.yml** situado en la carpeta **.github>workflows** donde tenemos definido un workflow de demostración muy simple.
 
 <pre>
-name: Ejercicio con Eventos
-<span style="color:DarkRed;">on: ...</span>
+name: Desplegar Sitio Web
+on:
+  push:
+    branches:
+      - main
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Mostrar datos del evento
-        run: echo "${{ toJSON(github.event) }}"
       - name: Obtener código
         uses: actions/checkout@v4
       - name: Instalar dependencias
         run: npm ci
+      - name: Lintear código
+        run: npm run lint
       - name: Ejecutar pruebas
         run: npm run test
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+      - name: Instalar dependencias
+        run: npm ci
       - name: Compilar código
         run: npm run build
-      - name: Desplegar el proyecto
-        run: echo "Desplegando..."
-</pre>
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Desplegar sitio web
+        run: echo "Desplegando..."</pre>
 
 A continuación tenemos 2 secciones claramente diferenciadas. La primera detallará los pasos que debemos seguir para preparar nuestro entorno para el desarrollo del ejercicio. Y la segunda parte detalla el desarrollo completo de los ejercicios, paso a paso.
 
@@ -85,11 +99,11 @@ A continuación tenemos 2 secciones claramente diferenciadas. La primera detalla
    
    Una vez probada nuestra aplicación, para detenerla, simplemente volvemos a nuestro entorno de desarrollo, hacemos clic en el terminal para asegurarnos que el foco se encuentra allí y digitamos `Ctrl+C`. Una vez realizado esto, el terminal volverá a estar listo para ingresar nuevos comandos.
 
-10. FinalmenPor último, como todo el propósito de nuestro ejercicio consiste en practicar con las funcionalidades de GitHub Actions, es un buen momento para instalar la extensión de GitHub Actions. Para esto, seleccionamos la opción **Extensions** (aquella que parece una pieza de tetris) en la barra lateral izquierda, en el buscador de extensiones ingresamos el texto `GitHub Actions`, y le damos al botón **Install** a la derecha de la primera extensión mostrada en el listado (aquella que tiene a GitHub como autor verificado).
+10. Ahora procedemos a instalar la extensión de GitHub Actions. Para esto, seleccionamos la opción **Extensions** (aquella que parece una pieza de tetris) en la barra lateral izquierda, en el buscador de extensiones ingresamos el texto `GitHub Actions`, y le damos al botón **Install** a la derecha de la primera extensión mostrada en el listado (aquella que tiene a GitHub como autor verificado).
    
     ![Nuestra aplicación de ejemplo](img/install-github-actions-extension.png)
 
-11. Una vez instalada la extensión de GitHub Actions, seleccionar su ícono en la barra lateral, y hacer clic en el botón **Sign in to GitHub**.
+11. Una vez instalada la extensión de GitHub Actions, seleccionamos su ícono en la barra lateral, y hacemos clic en el botón **Sign in to GitHub**.
     
     ![Inicio de sesión en GitHub](img/github-signin.png)
    
@@ -101,64 +115,23 @@ A continuación tenemos 2 secciones claramente diferenciadas. La primera detalla
 
     ![Extensión de GitHub Actions](img/github-actions-extension.png)
 
-13. Abrimos nuestro archivo de definición de workflow **eventos.yml**, y agregamos los eventos `push` y `workflow_dispatch`, y guardarmos nuestro archivo.
-    
-    <pre>
-    name: Ejercicio con Eventos
-    <span style="color:Navy;"><b>on: [push, workflow_dispatch]</b></span>
-    jobs:
-      deploy:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Mostrar datos del evento
-            run: echo "${{ toJSON(github.event) }}"
-          - name: Obtener código
-            uses: actions/checkout@v4
-          - name: Instalar dependencias
-            run: npm ci
-          - name: Ejecutar pruebas
-            run: npm run test
-          - name: Compilar código
-            run: npm run build
-          - name: Desplegar el proyecto
-            run: echo "Desplegando..."
-    </pre>
+13. Volvemos a la página de nuestro proyecto e ingresamos a la pestaña de **Actions**, donde se nos mostrará una advertencia indicando que los workflows están desactivados porque venían ya en el repo desde el que se hizo el fork.
 
-14. En el terminal de nuestro entorno de desarrollo sincronizamos nuestros cambios ingresando los siguientes comandos:
-
-    <pre>
-    git add .
-    git commit -m "Adición de eventos básicos"
-    git push
-    </pre>
-
-15. Volvemos a la página de nuestro proyecto e ingresamos a la pestaña de **Actions**, donde se nos mostrará una advertencia indicando que los workflows están desactivados porque venían ya en el repo desde el que se hizo el fork.
-
-    ![Lanzamos nuestro workflow](img/workflows-disabled.png)
+    ![Workflows desactivados](img/workflows-disabled.png)
 
     Para activar nuestro workflow, simplemente le damos clic al botón verde **I understand my workflows, go ahead and enable them**.
 
-16. Una vez activados los workflows nuevamente, seleccionamos en el panel de la izquierda nuestro workflow **Ejercicio con Eventos** y en el panel derecho le damos clic a **Run workflow**. Luego de unos segundos, obtendremos el resultado de dicha ejecución:
+14. Una vez activados los workflows nuevamente, podemos apreciar en el panel de la izquierda nuestro workflow **Desplegar Sitio Web**.
 
-    ![Lanzamos nuestro workflow](img/run-workflow.png)
+    ![Workflow aún sin ejecuciones](img/no-workflow-runs-yet.png)
 
-17. Luego, podremos ver nuestro workflow en el segundo panel de la extensión de GitHub Actions en nuestro entorno de desarrollo (probablemente sea necesario darle clic al botón **Refresh**).
+15. Luego, podremos ver nuestro workflow en el segundo panel (Workflows) de la extensión de GitHub Actions en nuestro entorno de desarrollo (probablemente sea necesario darle clic al botón **Refresh**).
 
     ![Lanzamos nuestro workflow](img/workflows-updated.png)
+    
+  Por fin, con este paso tenemos nuestro entorno listo para proceder con el desarrollo del ejercicio a continuación.
 
-18. (Opcional) Si intentamos lanzar nuestro workflow con el botón **Trigger workflow**, la paleta de comandos nos solicitará confirmar la referencia para la ejecución de nuestro workflow. Aquí podemos confirmar el valor por defecto dándole simplemente a ***Enter***.
-
-    ![Lanzamos nuestro workflow](img/enter-ref.png)
-
-    Sin embargo, esta es una funcionalidad que por el momento todavía no está soportada en GitHub CodeSpaces, por lo que se nos mostrará el siguiente mensaje de error:
-
-    ![Lanzamos nuestro workflow](img/trigger-workflow-error.png)
-
-    A pesar de esto, la extensión no tiene problemas en mostrarnos el estado de los workflows gatillados de cualquier otra forma, tal como en el caso de nuestra primera ejecución manual. 
-
-Por fin, con este paso tenemos nuestro entorno listo para proceder con el desarrollo del ejercicio a continuación.
-
-## Desarrollo del ejercicio - Tipos de Actividad
+## Desarrollo del ejercicio - Artefactos
 
 1. Para iniciar el desarrollo del ejercicio, actualizamos nuestro documento de workflow reemplazando el contenido de la directiva **on**:  [Gist Paso 1](https://gist.github.com/ricardomasabeltsoft/97af3e34900151a1e16214a80d5bdfa4)
    
