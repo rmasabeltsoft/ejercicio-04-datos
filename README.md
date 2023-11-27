@@ -133,79 +133,53 @@ A continuación tenemos 2 secciones claramente diferenciadas. La primera detalla
 
 ## Desarrollo del ejercicio - Artefactos
 
-1. Para iniciar el desarrollo del ejercicio, actualizamos nuestro documento de workflow reemplazando el contenido de la directiva **on**:  [Gist Paso 1](https://gist.github.com/ricardomasabeltsoft/97af3e34900151a1e16214a80d5bdfa4)
-   
-   	<pre>
-    name: Ejercicio con Eventos
-    <span style="color:Navy;"><b>on:
-      pull_request:
-        types:
-          - opened
-      workflow_dispatch:</b></span>
-    jobs:
-      deploy:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Mostrar datos del evento
-            run: echo "${{ toJSON(github.event) }}"
-          - name: Obtener código
-            uses: actions/checkout@v4
-          - name: Instalar dependencias
-            run: npm ci
-          - name: Ejecutar pruebas
-            run: npm run test
-          - name: Compilar código
-            run: npm run build
-          - name: Desplegar el proyecto
-            run: echo "Desplegando..."</pre>
-   
-2. Sincronizamos nuestros cambios hacia el repositorio con los siguientes comandos:
+1. Para ver qué archivos se producirán en el job de **build**, ejecutamos los comandos que lo conforman de forma local. Empezamos por la instalación de las dependencias del proyecto:
    
    <pre>
-   git add .
-   git commit -m "Adición de tipos de actividades"
-   git push</pre>
-
-3. Verificamos en la pestaña **Actions** de nuestro repositorio y vemos que no hay más ejecuciones de nuestro workflow.
+   npm ci</pre>
    
-   ![No hay más ejecuciones de nuestro workflow](img/no-new-workflow-runs.png)
-
-4. Agregamos una nueva rama denominada **dev**:
+2. Ahora compilamos el código:
    
    <pre>
-   git checkout -b dev</pre>
+   npm run build</pre>
 
-5. Hacemos un pequeño cambio en el encabezado en nuestro archivo **App.jsx**. [Gist Paso 5](https://gist.github.com/ricardomasabeltsoft/83c123fc6549e6f8dcb2d85c157ba5e6)
+3. Verificamos el contenido de la carpeta **dist** generada mediante los comandos anteriores.
+   
+   ![Contenido de la carpeta dist](img/dist-folder.png)
 
+4. Agregamos un paso a nuestro job de **build**. [Gist Paso 4](https://gist.github.com/ricardomasabeltsoft/64572f80251b8aa40bcaa0777b4f3516)
+   
+   <pre>
+     ...
+     build:
+       needs: test
+       runs-on: ubuntu-latest
+       steps:
+         - name: Obtener código
+           uses: actions/checkout@v4
+         - name: Instalar dependencias
+           run: npm ci
+         - name: Compilar código
+           run: npm run build
+         <span style="color:Navy;"><b>- name: Cargar artefacto
+           uses: actions/upload-artifact@v3
+           with:
+             name: website-dist
+             path: |
+               dist
+               package.json</b></span>
+     deploy:
+     ...</pre>
+   
+5. Sincronizamos nuestros cambios hacia una nueva rama en el repositorio con los siguientes comandos:
+   
    ```
-   import MainContent from './components/MainContent';
-   import logo from './assets/images/logo.png';
-
-   function App() {
-     return (
-       <>
-         <header>
-           <div id="logo-img">
-             <img src={logo} />
-           </div>
-           <h1>Fundamentos de GitHub Actions y Eventos</h1>
-         </header>
-         <MainContent />
-       </>
-     );
-   }
-
-   export default App;
-   ```
-   
-6. Sincronizamos nuestros cambios hacia una nueva rama en el repositorio con los siguientes comandos:
-   
-   <pre>
    git add .
-   git commit -m "Cambio de encabezado"
-   git push origin dev</pre>
+   git commit -m "Adición de paso de carga de artefacto"
+   git push
+   ```
 
-7. Volvemos a nuestro repositorio y cambiamos a la pestaña **Code**. Se nos mostrará una notificación de push reciente a la rama dev, y hacemos clic en el botón verde **Compare & pull request**.
+6. Volvemos a nuestro repositorio y cambiamos a la pestaña **Code**. Se nos mostrará una notificación de push reciente a la rama dev, y hacemos clic en el botón verde **Compare & pull request**.
    
    ![Notificación de push reciente a dev](img/dev-recent-push.png)
 

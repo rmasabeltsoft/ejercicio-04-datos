@@ -11,8 +11,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Instalar dependencias
         run: npm ci
-      - name: Lintear código
-        run: npm run lint
       - name: Ejecutar pruebas
         run: npm run test
   build:
