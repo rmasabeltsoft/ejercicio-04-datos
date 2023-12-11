@@ -32,5 +32,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Descargar artefacto
+        uses: actions/download-artifact@v3
+        with:
+          name: website-dist
+      - name: Verificar descarga
+        run: ls
       - name: Desplegar sitio web
         run: echo "Desplegando..."
