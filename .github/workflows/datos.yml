@@ -23,6 +23,11 @@ jobs:
         run: npm ci
       - name: Compilar código
         run: npm run build
+      - name: Cargar artefacto
+        uses: actions/upload-artifact@v3
+        with:
+          name: website-dist
+          path: dist
   deploy:
     needs: build
     runs-on: ubuntu-latest
